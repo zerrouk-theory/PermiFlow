@@ -1,134 +1,176 @@
-Slogan français percutant
+PermiFlow — Captez le pouls de la ville
 
-PermiFlow — Captez le pouls de la ville.
+PermiFlow est une plateforme web pour parier sur l’évolution immobilière au niveau local à partir des permis de construire et autres données publiques.
+Ce README décrit comment configurer, lancer et déployer l’application.
 
-Court, mémorable, dynamique, il évoque l’idée de mouvements urbains, de données et d’opportunités.
+1. Prérequis
 
-🎨 Concept de logo & icônes (desktop + mobile)
+Node.js ≥ 20
 
-Idée visuelle
+npm ou yarn
 
-Un pictogramme combinant un toit / silhouette de bâtiments + une flèche ascendante stylisée, évoquant à la fois la ville et l’idée de “flux” ou “montée”.
+Python 3.11+ (pour le scraping et scoring)
 
-Style minimal, traits nets, peu de détails — pour un rendu lisible même en petite icône.
+Compte Supabase
 
-Palette suggérée : bleu profond (#1E3A8A) + or pâle / jaune clair pour l’accentuation (sens “montée / succès”) + fond neutre clair ou sombre selon contexte.
+Compte Stripe (mode test suffisant)
 
-Déclinaisons à prévoir
+Git
 
-icône 512×512 px (PNG) — pour favicon, PWA, splash mobile
+Vercel account pour le déploiement
 
-icône 192×192 px (PNG) — pour PWA / Android
+2. Installation locale
 
-favicon.ico classique
+Cloner le repo :
 
-SVG vectoriel — pour header, logo haute qualité, scalability
-
-Manifest + meta pour PWA / mobile
-Inclure un fichier manifest.json + liens dans le <head> de tes pages HTML, afin que l’app puisse être installable comme application mobile native. Exemple minimal (repris de bonnes pratiques PWA) 
-MDN Web Docs
-+1
-
-🌐 Vérification des noms de domaines disponibles
-
-Avant d’enregistrer un domaine, c’est sage d’utiliser un outil de vérification gratuit. Quelques options réputées :
-
-NameCheckerr — vérifie domaine + disponibilité des noms sur réseaux sociaux. 
-NameCheckerr
-
-IONOS — vérificateur de domaine simple, accès rapide aux TLD classiques et moins courants. 
-IONOS
-
-Des générateurs de domaines comme ceux de GoDaddy ou services similaires, utiles pour trouver des variantes si le .com est pris. 
-GoDaddy
-+1
-
-Exemple de domaines à tester pour PermiFlow
-permiflow.com  
-permiflow.fr  
-permiflow.app  
-permiflow.io  
-permiflow.dev  
+git clone https://github.com/<votre-user>/permiflow.git
+cd permiflow/apps/web
 
 
-Je te conseille de tester plusieurs extensions, puis choisir celle qui correspond le mieux à ta stratégie (international — .com/.io, français — .fr, application/web-app — .app).
+Installer les dépendances :
 
-Quand tu vois ✅ disponible, réserve-le immédiatement : les bons domaines partent vite.
-
-📄 README minimal mis à jour
-# PermiFlow
-
-PermiFlow — Captez le pouls de la ville.
-
-## 🚀 Objectif  
-PermiFlow analyse les données de permis de construire des communes (IRIS / zones territoriales), permet de visualiser les dynamiques urbaines sur une carte, et offre un système de pari / prédiction basé sur ces données.
-
-## 🌐 Stack technique  
-- NextJS 14 + TypeScript  
-- TailwindCSS  
-- Supabase (DB, Row-Level Security)  
-- Stripe (paiements)  
-- React Simple Maps (cartographie)  
-- Zustand (state)  
-
-## 🔧 Installation locale  
-
-```bash
-git clone https://github.com/<ton-user>/<repo>.git  
-cd <repo>  
-npm install  
-npm run dev  
-
-🔑 Variables d’environnement (fichier .env.local)
-NEXT_PUBLIC_SUPABASE_URL=https://<votre>.supabase.co  
-NEXT_PUBLIC_SUPABASE_ANON_KEY=<anon_key>  
-SUPABASE_SERVICE_ROLE_KEY=<service_role_key>        # à stocker dans les secrets  
-STRIPE_SECRET_KEY=sk_test_...  
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...  
-NEXT_PUBLIC_APP_URL=http://localhost:3000  
-STRIPE_ENDPOINT_SECRET=whsec_...                   # après test Stripe CLI  
-
-🛠 Base de données
-
-Utiliser le script SQL fourni pour créer les tables towns, users, bets, activer RLS et insérer quelques données tests. Puis (optionnel) générer les types TypeScript via npm run db-types.
-
-📦 Déploiement
-
-Hébergement : Vercel
-
-Variables sensibles en secrets (clé Stripe, clé service Supabase)
-
-Ajout d’un domaine personnalisé si disponible
-
-Favicon + manifest + icônes pour PWA / mobile
-
-🧪 Bonus
-
-Carte interactive des zones IRIS
-
-Routes API pour scraping automatique (cron GitHub Actions)
-
-Webhook Stripe + gestion des paiements / mises / paris
-
-📝 Licence
-
-MIT — libre à modif, tant que crédit donné.
+npm install
+# ou
+yarn install
 
 
----
+Créer un fichier .env.local à la racine de apps/web :
 
-## ✅ Ce qu’il te reste à faire **tout de suite**  
+NEXT_PUBLIC_SUPABASE_URL=<votre_supabase_url>
+NEXT_PUBLIC_SUPABASE_ANON_KEY=<votre_supabase_anon_key>
+SUPABASE_SERVICE_ROLE_KEY=<votre_service_role_key>
+STRIPE_SECRET_KEY=<votre_stripe_secret_key>
+STRIPE_PUBLISHABLE_KEY=<votre_stripe_publishable_key>
 
-1. Vérifier la disponibilité d’un ou plusieurs domaines pour “PermiFlow” (via NameCheckerr, IONOS, etc.).  
-2. Générer un logo (SVG + PNG + favicon), l’importer dans le projet (`public/icons/…`).  
-3. Mettre à jour le manifest + meta tags pour PWA / mobile.  
-4. Ajouter le README mis à jour dans le repo.  
-5. Si domaine réservé — configurer DNS + domaine sur Vercel, mettre à jour `NEXT_PUBLIC_APP_URL`.  
+3. Configuration Supabase
 
----
+Créer un projet Supabase.
 
-Si tu veux que je génère **un logo SVG minimal squelette** (forme + couleurs), je peux te le coder (en “ASCII-SVG”, puis tu copieras) — ça te donne immédiatement une base vectorielle. Veux-tu que je crée ce SVG pour PermiFlow maintenant ?
-::contentReference[oaicite:8]{index=8}
+Exécuter le script SQL pour créer la base de données :
+
+psql -h <host> -U <user> -d <db> -f infra/supabase/schema.sql
+psql -h <host> -U <user> -d <db> -f infra/supabase/seed.sql
 
 
-ChatGPT peut commettre des erreurs. Il est recommandé de vérifier les informations importan
+Vérifier que les tables users, bets, towns sont bien créées.
+
+Vérifier les règles RLS si activées (ex : public par défaut pour dev).
+
+4. Configuration Stripe
+
+Créer un compte Stripe et activer le mode test.
+
+Créer un produit “PermiFlow Credits” ou “Abonnement Pro”.
+
+Copier les clé API dans le .env.local.
+
+Vérifier que les webhooks pointent vers /api/payments/webhook.
+
+5. Lancer l’application localement
+# Backend et API serverless
+npm run dev
+# ou
+yarn dev
+
+
+URL frontend : http://localhost:3000
+
+API endpoints :
+
+/api/bets/route.ts — création et consultation des paris
+
+/api/score/route.ts — scoring en temps réel
+
+/api/settle/route.ts — clôture des paris
+
+/api/payments/checkout/route.ts — paiement
+
+/api/payments/webhook/route.ts — webhook Stripe
+
+6. Scraping et scoring nocturne
+
+1. Scraping SITADEL et autres sources
+
+cd worker/scraper
+python scrape_sitadel.py
+
+
+Génère un CSV JSON par IRIS.
+
+Met à jour Supabase avec la table towns.
+
+2. Score nocturne
+
+cd worker/model
+python score_nightly.py
+
+
+Réentraînement du modèle XGBoost
+
+Mise à jour des scores hype-factor 0-100 pour chaque IRIS
+
+Astuce : Ajouter un cron job (Linux/macOS) ou planificateur Windows pour exécuter chaque nuit.
+
+7. Déploiement sur Vercel
+
+Créer un projet Vercel et connecter le repo GitHub.
+
+Configurer les variables d’environnement (Supabase, Stripe).
+
+Déployer (vercel --prod ou via dashboard).
+
+Vérifier le build automatique et que /api/* fonctionne.
+
+8. Structure du projet
+permiflow/
+├─ apps/web/                  # Frontend NextJS
+│  ├─ app/
+│  ├─ components/
+│  ├─ pages/
+│  ├─ styles/
+│  └─ public/
+├─ worker/
+│  ├─ scraper/                # Scraper SITADEL
+│  └─ model/                  # Scoring XGBoost
+├─ infra/supabase/            # SQL schema + seed
+├─ scripts/                   # Scripts utilitaires
+├─ services/                  # Librairies Stripe / Supabase
+├─ .github/workflows/         # CI/CD
+├─ package.json
+└─ README.md
+
+9. Commandes utiles
+Commande	Description
+npm run dev	Lancer le frontend + API local
+npm run build	Builder NextJS pour prod
+npm run start	Lancer build prod local
+python worker/scraper/scrape_sitadel.py	Mettre à jour la DB avec les permis
+python worker/model/score_nightly.py	Calculer scores hype-factor
+vercel --prod	Déployer sur Vercel
+10. Check-list pour Cursor
+
+Cloner le repo.
+
+Installer les dépendances npm.
+
+Générer .env.local avec Supabase + Stripe.
+
+Vérifier schema.sql + seed.sql.
+
+Lancer API et frontend avec npm run dev.
+
+Lancer scrape_sitadel.py et score_nightly.py.
+
+Tester flux pari et wallet avec Stripe test.
+
+Déployer sur Vercel.
+
+11. Notes
+
+Version MVP : serverless PWA, sans apps natives.
+
+Limites free tier (Supabase, Vercel) : 1 000 utilisateurs max.
+
+Code généré via Manus / Cursor : prévoir relecture sécurité + test.
+
+Les paris respectent la limite légale (< 1 850 €/personne/an) pour rester en « pari mutuel ».
