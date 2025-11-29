@@ -1,0 +1,6 @@
+<svg width="320" height="120" viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg">
+  <rect width="320" height="120" rx="18" fill="#040816"/>
+  <path d="M40 90V52L80 34L120 52V90H40Z" fill="#1E3A8A"/>
+  <path d="M140 90L160 54L180 34L210 60" stroke="#F5D98C" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="150" y="96" font-family="Arial, sans-serif" font-size="28" fill="#F5D98C">PermiFlow</text>
+</svg>

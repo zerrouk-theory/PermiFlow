@@ -1,0 +1,107 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "751010101",
+      "properties": { "name": "Paris" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [2.27, 48.86],
+            [2.42, 48.86],
+            [2.42, 48.92],
+            [2.27, 48.92],
+            [2.27, 48.86]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "693870504",
+      "properties": { "name": "Lyon" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [4.77, 45.71],
+            [4.92, 45.71],
+            [4.92, 45.81],
+            [4.77, 45.81],
+            [4.77, 45.71]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "341720301",
+      "properties": { "name": "Montpellier" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [3.78, 43.56],
+            [3.98, 43.56],
+            [3.98, 43.68],
+            [3.78, 43.68],
+            [3.78, 43.56]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "315550205",
+      "properties": { "name": "Toulouse" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [1.32, 43.52],
+            [1.52, 43.52],
+            [1.52, 43.68],
+            [1.32, 43.68],
+            [1.32, 43.52]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "441090101",
+      "properties": { "name": "Nantes" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-1.66, 47.15],
+            [-1.36, 47.15],
+            [-1.36, 47.35],
+            [-1.66, 47.35],
+            [-1.66, 47.15]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "130550401",
+      "properties": { "name": "Marseille" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [5.2, 43.2],
+            [5.5, 43.2],
+            [5.5, 43.4],
+            [5.2, 43.4],
+            [5.2, 43.2]
+          ]
+        ]
+      }
+    }
+  ]
+}

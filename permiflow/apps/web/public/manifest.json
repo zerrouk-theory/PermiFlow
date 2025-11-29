@@ -1,0 +1,23 @@
+{
+  "name": "PermiFlow",
+  "short_name": "PermiFlow",
+  "description": "Captez le pouls de la ville — scores urbains & paris immobiliers.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#040816",
+  "theme_color": "#1E3A8A",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ]
+}
