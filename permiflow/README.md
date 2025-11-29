@@ -1,125 +1,151 @@
 # PermiFlow — Captez le pouls de la ville
 
-PermiFlow est une plateforme web qui permet de parier sur l'évolution immobilière locale à partir des permis de construire (SITADEL) et autres données publiques. Ce guide explique comment configurer, lancer, automatiser et déployer l'application de bout en bout.
+PermiFlow est une web-app de paris immobiliers basés sur les permis de construire. Les utilisateurs peuvent suivre l’évolution de leur ville ou région, scorer la « hype » des quartiers et parier sur la valeur future, en toute sécurité via un système de pool et wallet interne.
 
-## 1. Prérequis
-- Node.js ≥ 20
-- npm ou yarn
-- Python 3.11+ (scraping, scoring, worker)
-- Compte Supabase
-- Compte Stripe (mode test)
-- Git
-- Compte Vercel
+## 📌 Fonctionnalités clés
+- Saisie de ville ou code postal avec filtrage des permis dans un rayon configurable (5‑20 km).
+- Calcul automatisé du score « hype-factor » (0‑100) par zone IRIS en fonction des types de permis, fréquence et autres signaux publics.
+- Interface de paris UP / DOWN sur l’évolution du score dans une période définie (6‑18 mois).
+- Matching automatique des mises entre utilisateurs et distribution des gains après expiration.
+- Wallet interne avec paiements Stripe.
+- Scraping et scoring nocturnes automatisés (SITADEL, annonces, etc.).
 
-## 2. Installation locale
-```bash
-git clone https://github.com/<votre-user>/permiflow.git
-cd permiflow/apps/web
-npm install      # ou yarn install
+## 💰 Monétisation
+- Commission sur chaque pari : 3‑5 % de la pool.
+- Abonnement premium : accès API, données historiques, levier de mise.
+- Vente de données anonymisées (optionnel).
+
+## 🧩 Schéma logique PermiFlow
+```
+[Utilisateur saisit ville / code postal / région]
+                       │
+                       ▼
+           [Géocoding → lat/lon]
+                       │
+                       ▼
+         [Filtrage des IRIS / permis]
+         ┌─────────────────────────┐
+         │Pour chaque IRIS :       │
+         │Calcul distance → rayon? │
+         │Si oui, inclure          │
+         └─────────────────────────┘
+                       │
+                       ▼
+           [Algorithme scoring 0-100]
+           ┌─────────────────────────┐
+           │Input : nb permis, type  │
+           │travaux, fréquence, etc. │
+           │Output : hype-factor     │
+           └─────────────────────────┘
+                       │
+                       ▼
+       [Interface utilisateur – propositions]
+       ┌───────────────────────────────┐
+       │Liste zones avec score hype    │
+       │Sélection zone → mise UP/DOWN │
+       │Montant pari → validation      │
+       └───────────────────────────────┘
+                       │
+                       ▼
+         [Matching / Pool + wallet interne]
+                       │
+                       ▼
+           [Distribution gains / pertes]
+                       │
+                       ▼
+            [Stats / historique pari]
 ```
 
-Créer ensuite `apps/web/.env.local` :
-```
-NEXT_PUBLIC_SUPABASE_URL=<votre_supabase_url>
-NEXT_PUBLIC_SUPABASE_ANON_KEY=<votre_supabase_anon_key>
-SUPABASE_SERVICE_ROLE_KEY=<votre_service_role_key>
-STRIPE_SECRET_KEY=<votre_stripe_secret_key>
-STRIPE_PUBLISHABLE_KEY=<votre_stripe_publishable_key>
-```
+## ⚙️ Stack technique
+- Frontend : Next.js + React + TailwindCSS.
+- Backend / API : Edge Functions / serverless (Vercel).
+- DB / Auth / Storage : Supabase.
+- Paiements / Wallet : Stripe.
+- Scraping & Scoring : Python (pandas, XGBoost) via cron GitHub Actions.
+- Hosting / Déploiement : Vercel (PWA responsive).
 
-## 3. Configuration Supabase
-1. Créer un projet Supabase.
-2. Exécuter les scripts SQL :
-```bash
-psql -h <host> -U <user> -d <db> -f infra/supabase/schema.sql
-psql -h <host> -U <user> -d <db> -f infra/supabase/seed.sql
-```
-3. Vérifier les tables `users`, `bets`, `towns` et les règles RLS.
+## 🛠️ Installation & configuration
+1. **Cloner le repo**
+   ```bash
+   git clone https://github.com/TON_COMPTE/permiflow.git
+   cd permiflow
+   ```
 
-## 4. Configuration Stripe
-1. Créer un compte Stripe en mode test.
-2. Créer un produit « PermiFlow Credits » ou « Abonnement Pro ».
-3. Copier les clés API dans `.env.local`.
-4. S'assurer que les webhooks pointent vers `/api/payments/webhook`.
+2. **Configurer Supabase**
+   ```bash
+   psql -h db.supabase.co -U USERNAME -d DBNAME -f infra/supabase/schema.sql
+   psql -h db.supabase.co -U USERNAME -d DBNAME -f infra/supabase/seed.sql
+   ```
+   Variables à placer dans `apps/web/.env.local` :
+   ```
+   NEXT_PUBLIC_SUPABASE_URL=<your-url>
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=<your-anon-key>
+   ```
 
-## 5. Lancer l'application localement
-```bash
-npm run dev  # ou yarn dev
-```
-- Frontend : http://localhost:3000
-- API routes clés :
-  - `/api/bets/route.ts` — créer/lire les paris
-  - `/api/score/route.ts` — score en temps réel
-  - `/api/settle/route.ts` — clôture des paris
-  - `/api/payments/checkout/route.ts` — paiement
-  - `/api/payments/webhook/route.ts` — webhook Stripe
+3. **Configurer Stripe**
+   ```
+   STRIPE_SECRET_KEY=<your-secret-key>
+   STRIPE_PUBLISHABLE_KEY=<your-publishable-key>
+   ```
 
-## 6. Scraping et scoring nocturne
-1. **Scraping SITADEL**
-```bash
-cd worker/scraper
-python scrape_sitadel.py
-```
-   - Génère un CSV/JSON par IRIS
-   - Met à jour Supabase (`towns`)
+4. **Installer les dépendances**
+   ```bash
+   npm install
+   ```
 
-2. **Score nocturne**
-```bash
-cd worker/model
-python score_nightly.py
-```
-   - Réentraîne le modèle XGBoost
-   - Met à jour les scores hype-factor (0-100) par IRIS
+5. **Lancer frontend & backend**
+   ```bash
+   npm run dev        # Frontend http://localhost:3000
+   npm run dev:api    # Routes serverless /api/*
+   ```
 
-3. Option : ajouter un cron job (Linux/macOS) ou planificateur Windows pour exécution quotidienne.
+## 🕵️ Scraping & scoring nocturne
+- Scraper SITADEL / sources publiques :
+  ```bash
+  python scraper/scrape_sitadel.py
+  ```
 
-## 7. Déploiement sur Vercel
-1. Créer un projet Vercel et connecter le repo GitHub.
-2. Configurer les variables d'environnement (Supabase, Stripe, URLs).
-3. Déployer (`vercel --prod` ou dashboard).
-4. Vérifier le build et les routes `/api/*`.
+- Scoring nocturne (mise à jour hype-factor) :
+  ```bash
+  python services/model/score_nightly.py
+  ```
 
-## 8. Structure du projet
+- Automatisation : `.github/workflows/permiflow.yml` programme une exécution quotidienne (02h00) pour scraping + scoring + dépôt des résultats dans Supabase.
+
+## 🚀 Déploiement sur Vercel
+- Connecter le repo GitHub à Vercel.
+- Définir les variables Supabase + Stripe dans le dashboard.
+- Laisser Vercel builder automatiquement → PWA live.
+- Ajouter un domaine custom pour le HTTPS.
+
+## 💡 Tips pour un MVP rapide
+- Matching simplifié : cotes fixes, pool fermé pour rester sous l’AMF (< 1 850 €/user/an).
+- Rayon par défaut : 10 km autour de la ville saisie.
+- Wallet interne : top-up via Stripe, retrait manuel au début.
+- Dashboard admin temps réel pour suivre mises & gains.
+
+## 📂 Structure principale du repo
 ```
 permiflow/
-├─ apps/web/                  # Frontend Next.js
-│  ├─ app/
-│  ├─ components/
-│  ├─ pages/
-│  ├─ styles/
-│  └─ public/
-├─ worker/
-│  ├─ scraper/                # Scraper SITADEL
-│  └─ model/                  # Scoring XGBoost
-├─ infra/supabase/            # SQL schema + seed
-├─ scripts/                   # Scripts utilitaires
-├─ services/                  # Librairies Stripe / Supabase
-├─ .github/workflows/         # CI/CD
+├─ apps/web/            # Frontend NextJS
+├─ api/                 # Serverless endpoints
+│  ├─ bets/             # CRUD paris
+│  ├─ payments/         # Checkout / webhook Stripe
+│  ├─ score/            # Calcul hype-factor
+│  └─ settle/           # Distribution pool
+├─ components/ui/       # Composants React réutilisables
+├─ data/                # GeoJSON + mocks
+├─ hooks/               # useBetStore
+├─ lib/                 # Clients Supabase + Stripe
+├─ services/model/      # Scoring / ML
+├─ scraper/             # Scripts SITADEL
+├─ worker/              # Settle & nightly updates
+├─ infra/supabase/      # SQL schema & seed
 └─ README.md
 ```
 
-## 9. Commandes utiles
-| Commande | Description |
-| --- | --- |
-| `npm run dev` | Lancer frontend + API local |
-| `npm run build` | Builder Next.js pour prod |
-| `npm run start` | Lancer le build prod local |
-| `python worker/scraper/scrape_sitadel.py` | Mettre à jour la DB avec les permis |
-| `python worker/model/score_nightly.py` | Calculer les scores hype-factor |
-| `vercel --prod` | Déployer sur Vercel |
-
-## 10. Check-list Cursor
-1. Cloner le repo.
-2. Installer les dépendances npm.
-3. Générer `.env.local` (Supabase + Stripe).
-4. Vérifier `schema.sql` + `seed.sql`.
-5. Lancer API + frontend avec `npm run dev`.
-6. Lancer `scrape_sitadel.py` puis `score_nightly.py`.
-7. Tester le flux pari/wallet avec Stripe (mode test).
-8. Déployer sur Vercel.
-
-## 11. Notes
-- MVP serverless PWA, pas d'app native.
-- Limites free tier (Supabase, Vercel) ≈ 1 000 utilisateurs.
-- Code généré via Manus/Cursor → prévoir revue sécurité + tests.
-- Les paris respectent la limite légale (< 1 850 €/personne/an) pour rester en « pari mutuel ».
+## 🔗 Liens utiles
+- SITADEL : https://www.data.gouv.fr/fr/datasets/permis-de-construire/
+- Supabase Docs : https://supabase.com/docs
+- Stripe Docs : https://stripe.com/docs
+- Vercel Docs : https://vercel.com/docs
