@@ -1,101 +1,125 @@
 # PermiFlow — Captez le pouls de la ville
 
-PermiFlow est une PWA Next.js qui analyse les permis de construire (SITADEL) pour générer un score « hype » par quartier et permettre de miser sur la dynamique urbaine. Le dépôt fournit **tout le MVP** : frontend, API routes, scraper Python, scoring ML, worker de règlement, scripts Supabase + Stripe et CI/CD.
+PermiFlow est une plateforme web qui permet de parier sur l'évolution immobilière locale à partir des permis de construire (SITADEL) et autres données publiques. Ce guide explique comment configurer, lancer, automatiser et déployer l'application de bout en bout.
 
-## Sommaire
-- [Structure](#structure)
-- [Installation rapide](#installation-rapide)
-- [Frontend](#frontend)
-- [Services Python](#services-python)
-- [Supabase](#supabase)
-- [Stripe](#stripe)
-- [CI/CD GitHub Actions](#cicd-github-actions)
-- [Scripts utilitaires](#scripts-utilitaires)
+## 1. Prérequis
+- Node.js ≥ 20
+- npm ou yarn
+- Python 3.11+ (scraping, scoring, worker)
+- Compte Supabase
+- Compte Stripe (mode test)
+- Git
+- Compte Vercel
 
-## Structure
+## 2. Installation locale
+```bash
+git clone https://github.com/<votre-user>/permiflow.git
+cd permiflow/apps/web
+npm install      # ou yarn install
+```
+
+Créer ensuite `apps/web/.env.local` :
+```
+NEXT_PUBLIC_SUPABASE_URL=<votre_supabase_url>
+NEXT_PUBLIC_SUPABASE_ANON_KEY=<votre_supabase_anon_key>
+SUPABASE_SERVICE_ROLE_KEY=<votre_service_role_key>
+STRIPE_SECRET_KEY=<votre_stripe_secret_key>
+STRIPE_PUBLISHABLE_KEY=<votre_stripe_publishable_key>
+```
+
+## 3. Configuration Supabase
+1. Créer un projet Supabase.
+2. Exécuter les scripts SQL :
+```bash
+psql -h <host> -U <user> -d <db> -f infra/supabase/schema.sql
+psql -h <host> -U <user> -d <db> -f infra/supabase/seed.sql
+```
+3. Vérifier les tables `users`, `bets`, `towns` et les règles RLS.
+
+## 4. Configuration Stripe
+1. Créer un compte Stripe en mode test.
+2. Créer un produit « PermiFlow Credits » ou « Abonnement Pro ».
+3. Copier les clés API dans `.env.local`.
+4. S'assurer que les webhooks pointent vers `/api/payments/webhook`.
+
+## 5. Lancer l'application localement
+```bash
+npm run dev  # ou yarn dev
+```
+- Frontend : http://localhost:3000
+- API routes clés :
+  - `/api/bets/route.ts` — créer/lire les paris
+  - `/api/score/route.ts` — score en temps réel
+  - `/api/settle/route.ts` — clôture des paris
+  - `/api/payments/checkout/route.ts` — paiement
+  - `/api/payments/webhook/route.ts` — webhook Stripe
+
+## 6. Scraping et scoring nocturne
+1. **Scraping SITADEL**
+```bash
+cd worker/scraper
+python scrape_sitadel.py
+```
+   - Génère un CSV/JSON par IRIS
+   - Met à jour Supabase (`towns`)
+
+2. **Score nocturne**
+```bash
+cd worker/model
+python score_nightly.py
+```
+   - Réentraîne le modèle XGBoost
+   - Met à jour les scores hype-factor (0-100) par IRIS
+
+3. Option : ajouter un cron job (Linux/macOS) ou planificateur Windows pour exécution quotidienne.
+
+## 7. Déploiement sur Vercel
+1. Créer un projet Vercel et connecter le repo GitHub.
+2. Configurer les variables d'environnement (Supabase, Stripe, URLs).
+3. Déployer (`vercel --prod` ou dashboard).
+4. Vérifier le build et les routes `/api/*`.
+
+## 8. Structure du projet
 ```
 permiflow/
-├─ apps/web/             # Next.js 14 app router + Tailwind 4
-├─ services/
-│  ├─ scraper/           # scrape_sitadel.py + requirements
-│  ├─ model/             # train_score.py / score_nightly.py
-│  └─ worker/            # settle.py
-├─ infra/supabase/       # schema.sql + seed.sql
-├─ scripts/              # seed.js + health_check.sh
-├─ .github/workflows/    # CI/CD pipeline
-├─ .env.example          # Variables globales
-└─ README.md             # Ce fichier
+├─ apps/web/                  # Frontend Next.js
+│  ├─ app/
+│  ├─ components/
+│  ├─ pages/
+│  ├─ styles/
+│  └─ public/
+├─ worker/
+│  ├─ scraper/                # Scraper SITADEL
+│  └─ model/                  # Scoring XGBoost
+├─ infra/supabase/            # SQL schema + seed
+├─ scripts/                   # Scripts utilitaires
+├─ services/                  # Librairies Stripe / Supabase
+├─ .github/workflows/         # CI/CD
+└─ README.md
 ```
 
-## Installation rapide
-```bash
-git clone <repo>
-cd permiflow
-cp .env.example .env.local        # adapter les clés
-
-# Frontend
-npm install --prefix apps/web
-npm run dev --prefix apps/web
-
-# Scraper / services
-cd services/scraper && pip install -r requirements.txt
-python3 scrape_sitadel.py --dry-run
-```
-
-### Variables d'environnement clés
-| Nom | Usage |
+## 9. Commandes utiles
+| Commande | Description |
 | --- | --- |
-| `NEXT_PUBLIC_SUPABASE_URL` | URL public Supabase |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | clé anonyme pour le frontend |
-| `SUPABASE_SERVICE_ROLE_KEY` | service role pour scraper / workers |
-| `STRIPE_SECRET_KEY` | clé secrète Stripe |
-| `STRIPE_ENDPOINT_SECRET` | signature webhook |
-| `NEXT_PUBLIC_APP_URL` | URL Vercel / PWA |
-| `SITADEL_DATA_URL` | override éventuel de la source CSV |
+| `npm run dev` | Lancer frontend + API local |
+| `npm run build` | Builder Next.js pour prod |
+| `npm run start` | Lancer le build prod local |
+| `python worker/scraper/scrape_sitadel.py` | Mettre à jour la DB avec les permis |
+| `python worker/model/score_nightly.py` | Calculer les scores hype-factor |
+| `vercel --prod` | Déployer sur Vercel |
 
-## Frontend
-- **Stack** : Next.js 16 (app router), React Simple Maps, Tailwind 4, Zustand.
-- **Pages** :
-  - `/` : carte heatmap, KPIs, pipeline nightly, aperçu des 30 écrans.
-  - `/paris` : formulaire interactif pour créer un pari.
-  - `/dashboard` : wallet, historique, recap paris.
-  - `/screens` + `/screens/[slug]` : galerie des 30 UI screens (demandé).
-- **API routes** :
-  - `api/bets` (GET/POST) : CRUD paris (Supabase + fallback mock).
-  - `api/score` : scores IRIS.
-  - `api/settle` : déclenchement manuel du règlement.
-  - `api/payments/checkout` + `api/payments/webhook` : flux Stripe Checkout.
-- **PWA** : `manifest.json`, icônes 192/512px, favicon et meta dans `layout.tsx`.
+## 10. Check-list Cursor
+1. Cloner le repo.
+2. Installer les dépendances npm.
+3. Générer `.env.local` (Supabase + Stripe).
+4. Vérifier `schema.sql` + `seed.sql`.
+5. Lancer API + frontend avec `npm run dev`.
+6. Lancer `scrape_sitadel.py` puis `score_nightly.py`.
+7. Tester le flux pari/wallet avec Stripe (mode test).
+8. Déployer sur Vercel.
 
-## Services Python
-| Script | Description |
-| --- | --- |
-| `services/scraper/scrape_sitadel.py` | Télécharge SITADEL, agrège par IRIS, upsert Supabase (cron nightly). |
-| `services/model/train_score.py` | Entraîne un modèle XGBoost (fichier `models/hype_score.json`). |
-| `services/model/score_nightly.py` | Charge les permis Supabase, prédit et met à jour les scores. |
-| `services/worker/settle.py` | Parcourt les paris expirés, applique fee 5 %, crédite les gagnants. |
-
-Tous les scripts  utilisent Python 3.11+ et la clé service Supabase.
-
-## Supabase
-- `infra/supabase/schema.sql` : tables (`users`, `towns`, `bets`, `payments`), fonction `increment_balance`, RLS minimale.
-- `infra/supabase/seed.sql` : 2 utilisateurs + 3 communes de démonstration.
-- `scripts/seed.js` : seed REST basique utilisable via `node scripts/seed.js`.
-
-## Stripe
-- `api/payments/checkout` crée un checkout session (mode test).
-- `api/payments/webhook` consomme `checkout.session.completed` et appelle `increment_balance`.
-- Configurer `STRIPE_SECRET_KEY` + `STRIPE_ENDPOINT_SECRET`, puis `stripe listen --forward-to localhost:3000/api/payments/webhook`.
-
-## CI/CD GitHub Actions
-Workflow `/.github/workflows/permiflow.yml` :
-1. **build** (push & PR) : installe les dépendances, `npm run lint`, tests scripts.
-2. **nightly** (cron) : exécute scraper, scoring, worker, `scripts/health_check.sh`.
-3. **deploy** : placeholder pour `vercel deploy` (token/ID à ajouter dans les secrets).
-
-## Scripts utilitaires
-- `scripts/seed.js` : upsert users + towns via REST Supabase.
-- `scripts/health_check.sh` : ping `/api/score` et `/api/bets` (utilisé par le workflow).
-
-## Licence
-MIT — libre d'utilisation tant que le crédit PermiFlow est mentionné.
+## 11. Notes
+- MVP serverless PWA, pas d'app native.
+- Limites free tier (Supabase, Vercel) ≈ 1 000 utilisateurs.
+- Code généré via Manus/Cursor → prévoir revue sécurité + tests.
+- Les paris respectent la limite légale (< 1 850 €/personne/an) pour rester en « pari mutuel ».
