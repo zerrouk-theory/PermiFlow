@@ -1,0 +1,134 @@
+Slogan français percutant
+
+PermiFlow — Captez le pouls de la ville.
+
+Court, mémorable, dynamique, il évoque l’idée de mouvements urbains, de données et d’opportunités.
+
+🎨 Concept de logo & icônes (desktop + mobile)
+
+Idée visuelle
+
+Un pictogramme combinant un toit / silhouette de bâtiments + une flèche ascendante stylisée, évoquant à la fois la ville et l’idée de “flux” ou “montée”.
+
+Style minimal, traits nets, peu de détails — pour un rendu lisible même en petite icône.
+
+Palette suggérée : bleu profond (#1E3A8A) + or pâle / jaune clair pour l’accentuation (sens “montée / succès”) + fond neutre clair ou sombre selon contexte.
+
+Déclinaisons à prévoir
+
+icône 512×512 px (PNG) — pour favicon, PWA, splash mobile
+
+icône 192×192 px (PNG) — pour PWA / Android
+
+favicon.ico classique
+
+SVG vectoriel — pour header, logo haute qualité, scalability
+
+Manifest + meta pour PWA / mobile
+Inclure un fichier manifest.json + liens dans le <head> de tes pages HTML, afin que l’app puisse être installable comme application mobile native. Exemple minimal (repris de bonnes pratiques PWA) 
+MDN Web Docs
++1
+
+🌐 Vérification des noms de domaines disponibles
+
+Avant d’enregistrer un domaine, c’est sage d’utiliser un outil de vérification gratuit. Quelques options réputées :
+
+NameCheckerr — vérifie domaine + disponibilité des noms sur réseaux sociaux. 
+NameCheckerr
+
+IONOS — vérificateur de domaine simple, accès rapide aux TLD classiques et moins courants. 
+IONOS
+
+Des générateurs de domaines comme ceux de GoDaddy ou services similaires, utiles pour trouver des variantes si le .com est pris. 
+GoDaddy
++1
+
+Exemple de domaines à tester pour PermiFlow
+permiflow.com  
+permiflow.fr  
+permiflow.app  
+permiflow.io  
+permiflow.dev  
+
+
+Je te conseille de tester plusieurs extensions, puis choisir celle qui correspond le mieux à ta stratégie (international — .com/.io, français — .fr, application/web-app — .app).
+
+Quand tu vois ✅ disponible, réserve-le immédiatement : les bons domaines partent vite.
+
+📄 README minimal mis à jour
+# PermiFlow
+
+PermiFlow — Captez le pouls de la ville.
+
+## 🚀 Objectif  
+PermiFlow analyse les données de permis de construire des communes (IRIS / zones territoriales), permet de visualiser les dynamiques urbaines sur une carte, et offre un système de pari / prédiction basé sur ces données.
+
+## 🌐 Stack technique  
+- NextJS 14 + TypeScript  
+- TailwindCSS  
+- Supabase (DB, Row-Level Security)  
+- Stripe (paiements)  
+- React Simple Maps (cartographie)  
+- Zustand (state)  
+
+## 🔧 Installation locale  
+
+```bash
+git clone https://github.com/<ton-user>/<repo>.git  
+cd <repo>  
+npm install  
+npm run dev  
+
+🔑 Variables d’environnement (fichier .env.local)
+NEXT_PUBLIC_SUPABASE_URL=https://<votre>.supabase.co  
+NEXT_PUBLIC_SUPABASE_ANON_KEY=<anon_key>  
+SUPABASE_SERVICE_ROLE_KEY=<service_role_key>        # à stocker dans les secrets  
+STRIPE_SECRET_KEY=sk_test_...  
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...  
+NEXT_PUBLIC_APP_URL=http://localhost:3000  
+STRIPE_ENDPOINT_SECRET=whsec_...                   # après test Stripe CLI  
+
+🛠 Base de données
+
+Utiliser le script SQL fourni pour créer les tables towns, users, bets, activer RLS et insérer quelques données tests. Puis (optionnel) générer les types TypeScript via npm run db-types.
+
+📦 Déploiement
+
+Hébergement : Vercel
+
+Variables sensibles en secrets (clé Stripe, clé service Supabase)
+
+Ajout d’un domaine personnalisé si disponible
+
+Favicon + manifest + icônes pour PWA / mobile
+
+🧪 Bonus
+
+Carte interactive des zones IRIS
+
+Routes API pour scraping automatique (cron GitHub Actions)
+
+Webhook Stripe + gestion des paiements / mises / paris
+
+📝 Licence
+
+MIT — libre à modif, tant que crédit donné.
+
+
+---
+
+## ✅ Ce qu’il te reste à faire **tout de suite**  
+
+1. Vérifier la disponibilité d’un ou plusieurs domaines pour “PermiFlow” (via NameCheckerr, IONOS, etc.).  
+2. Générer un logo (SVG + PNG + favicon), l’importer dans le projet (`public/icons/…`).  
+3. Mettre à jour le manifest + meta tags pour PWA / mobile.  
+4. Ajouter le README mis à jour dans le repo.  
+5. Si domaine réservé — configurer DNS + domaine sur Vercel, mettre à jour `NEXT_PUBLIC_APP_URL`.  
+
+---
+
+Si tu veux que je génère **un logo SVG minimal squelette** (forme + couleurs), je peux te le coder (en “ASCII-SVG”, puis tu copieras) — ça te donne immédiatement une base vectorielle. Veux-tu que je crée ce SVG pour PermiFlow maintenant ?
+::contentReference[oaicite:8]{index=8}
+
+
+ChatGPT peut commettre des erreurs. Il est recommandé de vérifier les informations importan
